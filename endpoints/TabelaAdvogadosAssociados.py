@@ -14,7 +14,7 @@ def listar_Cadastros():
     cursor = conn.cursor()
     cursor.execute("SELECT idAdvogadosAssociados, NomeAdvogadosAssociados, CPF_AdvogadosAssociados, ContatoAdvogadosAssociados, DadosJuridicosAdvogadosAssociados, RegistroAdvogadosAssociados FROM TabelaAdvogadosAssociados")
     dados = [
-        {"idAdministrador": row[0], "NomeAdvogadosAssociados": row[1], "CPF_AdvogadosAssociados": row[2], "ContatoAdvogadosAssociados": row[3], "DadosJuridicosAdvogadosAssociados": row[4], "RegistroAdvogadosAssociados": row [5]}
+        {"idAdvogadosAssociados": row[0], "NomeAdvogadosAssociados": row[1], "CPF_AdvogadosAssociados": row[2], "ContatoAdvogadosAssociados": row[3], "DadosJuridicosAdvogadosAssociados": row[4], "RegistroAdvogadosAssociados": row [5]}
         for row in cursor.fetchall()
     ]
     conn.close()
@@ -39,7 +39,7 @@ def criar_usuario():
     cursor.execute(
         "INSERT INTO tabelaadvogadosassociados (NomeAdvogadosAssociados, CPF_AdvogadosAssociados, ContatoAdvogadosAssociados, DadosJuridicosAdvogadosAssociados, RegistroAdvogadosAssociados)"
         "VALUES (?, ?, ?, ?, ?)",
-        (dados["NomeAdvogadosAssociado"], dados["CPF_AdvogadosAssociados"], dados["ContatoAdvogadosAssociados"], dados["DadosJuridicosAdvogadosAssociados"], dados ["RegistroAdvogadosAssociados"])
+        (dados["NomeAdvogadosAssociados"], dados["CPF_AdvogadosAssociados"], dados["ContatoAdvogadosAssociados"], dados["DadosJuridicosAdvogadosAssociados"], dados ["RegistroAdvogadosAssociados"])
     )
     conn.commit()
     novo_id = cursor.lastrowid
@@ -53,8 +53,8 @@ def criar_usuario():
 
 ##ROTA UPDATE
 #############################################
-@TabelaAdvogadosAssociados.route("/tabelaadvogadosassociados/<int:idTabelaAdvogadosAssociados>", methods=["PUT", "PATCH"])
-def atualizar_usuario(idTabelaAdvogadosAssociados):
+@TabelaAdvogadosAssociados.route("/tabelaadvogadosassociados/<int:idAdvogadosAssociados>", methods=["PUT", "PATCH"])
+def atualizar_usuario(idAdvogadosAssociados):
     dados = request.get_json(silent=True)
     if not dados:
         abort(400, description="JSON inválido ou ausente")
@@ -66,7 +66,7 @@ def atualizar_usuario(idTabelaAdvogadosAssociados):
             abort(400, description=f"PUT requer todos os campos: {', '.join(campos_esperados)}")
 
     # Monta dinamicamente o SQL somente com os campos enviados
-    campos_validos = {"NomeAdvogadosAssociados", "CPF_AdvogadosAssociados", "ContatoAdvogadosAssociados", "RegistroAdvogadosAssociados"}
+    campos_validos = {"NomeAdvogadosAssociados", "CPF_AdvogadosAssociados", "ContatoAdvogadosAssociados", "DadosJuridicosAdvogadosAssociados", "RegistroAdvogadosAssociados"}
     set_clauses = []
     valores = []
     for campo in campos_validos & dados.keys():
@@ -76,12 +76,12 @@ def atualizar_usuario(idTabelaAdvogadosAssociados):
     if not set_clauses:
         abort(400, description="Nenhum campo válido para atualizar")
 
-    valores.append(idTabelaAdvogadosAssociados)  # último parâmetro é o WHERE
+    valores.append(idAdvogadosAssociados)  # último parâmetro é o WHERE
 
     conn = conectar()
     cursor = conn.cursor()
     cursor.execute(
-        f"UPDATE tabelaadvogadosassociadosSET {', '.join(set_clauses)} WHERE idTabelaAdvogadosAssociados = ?",
+        f"UPDATE tabelaadvogadosassociadosSET {', '.join(set_clauses)} WHERE idAdvogadosAssociados = ?",
         tuple(valores)
     )
     conn.commit()
@@ -97,13 +97,13 @@ def atualizar_usuario(idTabelaAdvogadosAssociados):
 
 ##ROTA DELETE
 #############################################
-@TabelaAdvogadosAssociados.route("/tabelaadvogadosassociados/<int:idTabelaAdvogadosAssociados>", methods=["DELETE"])
-def deletar_usuario(idTabelaAdvogadosAssociados):
+@TabelaAdvogadosAssociados.route("/tabelaadvogadosassociados/<int:idAdvogadosAssociados>", methods=["DELETE"])
+def deletar_usuario(idAdvogadosAssociados):
     conn = conectar()
     cursor = conn.cursor()
 
     # tenta apagar o registro informado
-    cursor.execute("DELETE FROM tabelaadvogadosassociados WHERE idTabelaAdvogadosAssociados = ?", (idTabelaAdvogadosAssociados,))
+    cursor.execute("DELETE FROM tabelaadvogadosassociados WHERE idAdvogadosAssociados = ?", (idAdvogadosAssociados))
     conn.commit()
 
     # cursor.rowcount informa quantas linhas foram afetadas

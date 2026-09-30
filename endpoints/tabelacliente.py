@@ -2,20 +2,20 @@ from flask import Blueprint, jsonify, request, abort
 
 from funcaoConectar import conectar
 
-TabelaAdminstrador = Blueprint('tabelaadministrador', __name__)
+TabelaCliente = Blueprint('tabelacliente', __name__)
 
-#ROTAS PARA A TABELA TabelaAreaAdminstrador
+#ROTAS PARA A TABELA TabelaCliente
 ##ROTA GET,
 #alguns erros de escrita!
 ##############################################
-@TabelaAdminstrador("/tabelaadministrador", methods=["GET"])
+@TabelaAdminstrador("/tabelacliente", methods=["GET"])
 def listar_Cadastros():
     conn = conectar()
     #conn.execute("PRAGMA foreign_keys = ON") #ativa as chaves estrangeiras das tabelas (pois, não é ativado por padrão)
     cursor = conn.cursor()
-    cursor.execute("SELECT idAdministrador, nomeAdministrador, senhaAdministrador, contatoAdministrador, FROM TabelaAdministrador") #administrador
+    cursor.execute("SELECT idCliente, NomeCliente, SenhaCliente, CPF_Cliente, EnderecoClientes, ContatoCliente, DadosJuridicosClientes FROM TabelaCliente") #cliente
     dados = [
-        {"idAdministrador": row[0], "nomeAdministrador": row[1], "senhaAdministrador": row[2], "contatoAdministrador": row[3], "registroAdministrador": row[4]} #administrador
+        {"idCliente": row[0], "NomeCliente": row[1], "SenhaCliente": row[2], "CPF_Cliente": row[3], "EnderecoClientes": row[4], "ContatoCliente": row[5], "DadosJuridicosClientes": row[6]} #administrador
         for row in cursor.fetchall()
     ]
     conn.close()
@@ -24,50 +24,50 @@ def listar_Cadastros():
 ##ROTA INSERT
 #############################################
 
-@TabelaAdminstrador.route("/tabelaadministrador", methods=["POST"])
+@TabelaAdminstrador.route("/tabelacliente", methods=["POST"])
 def criar_usuario():
     dados = request.get_json(silent=True)
     if not dados:
         abort(400, description="JSON inválido ou ausente")
 
     # Validação de campos obrigatórios
-    campos_obrigatorios = {"nomeAdministrador", "senhaAdministrador", "contatoAdministrador", "registroAdministrador"}#adicionar registro ao banco ou corrigir.
+    campos_obrigatorios = {"NomeCliente", "SenhaCliente", "CPF_Cliente", "EnderecoClientes", "ContatoCliente", "DadosJuridicosClientes"}#adicionar registro ao banco ou corrigir.
     if not campos_obrigatorios.issubset(dados.keys()):
         abort(400, description=f"Campos obrigatórios: {', '.join(campos_obrigatorios)}")
 
     conn = conectar()
     cursor = conn.cursor()
     cursor.execute(
-    "INSERT INTO tabelaadministrador(nomeAdministrador, senhaAdministrador, contatoAdministrador, registroAdministrador)"
+    "INSERT INTO tabelacliente(NomeCliente, SenhaCliente, CPF_Cliente, EnderecoClientes, ContatoCliente, DadosJuridicosClientes)"
     "VALUES (?, ?, ?, ?)",
-    (dados["NomeAdminstrador"], dados["SenhaAdminstrador"], dados["ContatoAdminstrador"], dados["RegistroAdminstrador"])
+    (dados["NomeCliente"], dados["SenhaCliente"], dados["CPF_Cliente"], dados["EnderecoClientes"], dados["ContatoCliente"], dados["DadosJuridicosClientes"])
     )
     conn.commit()
     novo_id = cursor.lastrowid
     conn.close()
 
     # 201 Created + Location do recurso recém‑criado
-    resposta = jsonify({"idAdministrador": novo_id, **dados})
+    resposta = jsonify({"idCliente": novo_id, **dados})
     resposta.status_code = 201
-    resposta.headers["Location"] = f"/tabelaadministrador/{novo_id}"
+    resposta.headers["Location"] = f"/tabelacliente/{novo_id}"
     return resposta
 
 ##ROTA UPDATE
 #############################################
-@TabelaAdminstrador.route("/tabelaaadministrador/<int:idAdministrador>", methods=["PUT", "PATCH"])
-def atualizar_usuario(idAdministrador):
+@TabelaAdminstrador.route("/tabelacliente/<int:idCliente>", methods=["PUT", "PATCH"])
+def atualizar_usuario(idCliente):
     dados = request.get_json(silent=True)
     if not dados:
         abort(400, description="JSON inválido ou ausente")
 
     # Para PUT, garanta que todos os campos estejam presentes
     if request.method == "PUT":
-        campos_esperados = {"nomeAdministrador", "senhaAdministrador", "contatoAdministrador", "registroAdministrador"}
+        campos_esperados = {"NomeCliente", "SenhaCliente", "CPF_Cliente", "EnderecoClientes", "ContatoCliente", "DadosJuridicosClientes"}
         if not campos_esperados.issubset(dados.keys()):
             abort(400, description=f"PUT requer todos os campos: {', '.join(campos_esperados)}")
 
     # Monta dinamicamente o SQL somente com os campos enviados
-    campos_validos = {"nomeAdministrador", "senhaAdministrador", "contatoAdministrador", "registroAdministrador"}
+    campos_validos = {"NomeCliente", "SenhaCliente", "CPF_Cliente", "EnderecoClientes", "ContatoCliente", "DadosJuridicosCliente"}
     set_clauses = []
     valores = []
     for campo in campos_validos & dados.keys():
@@ -77,12 +77,12 @@ def atualizar_usuario(idAdministrador):
     if not set_clauses:
         abort(400, description="Nenhum campo válido para atualizar")
 
-    valores.append(idAdministrador)  # último parâmetro é o WHERE
+    valores.append(idCliente)  # último parâmetro é o WHERE
 
     conn = conectar()
     cursor = conn.cursor()
     cursor.execute(
-        f"UPDATE tabelaadministradorSET {', '.join(set_clauses)} WHERE idAdminstrador = ?",
+        f"UPDATE tabelaclienteSET {', '.join(set_clauses)} WHERE idCliente = ?",
         tuple(valores)
     )
     conn.commit()
@@ -98,13 +98,13 @@ def atualizar_usuario(idAdministrador):
 
 ##ROTA DELETE
 #############################################
-@TabelaAdminstrador.route("/tabelaadministrador/<int:idAdministrador>", methods=["DELETE"])
-def deletar_usuario(idAdministrador):
+@TabelaAdminstrador.route("/tabelacliente/<int:idCliente>", methods=["DELETE"])
+def deletar_usuario(idCliente):
     conn = conectar()
     cursor = conn.cursor()
 
     # tenta apagar o registro informado
-    cursor.execute("DELETE FROM tabelaadministrador WHERE idAdministrador = ?", (idAdministrador))
+    cursor.execute("DELETE FROM tabelacliente WHERE idCliente = ?", (idCliente))
     conn.commit()
 
     # cursor.rowcount informa quantas linhas foram afetadas
