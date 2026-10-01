@@ -8,7 +8,7 @@ TabelaCliente = Blueprint('tabelacliente', __name__)
 ##ROTA GET,
 #alguns erros de escrita!
 ##############################################
-@TabelaAdminstrador("/tabelacliente", methods=["GET"])
+@TabelaCliente("/tabelacliente", methods=["GET"])
 def listar_Cadastros():
     conn = conectar()
     #conn.execute("PRAGMA foreign_keys = ON") #ativa as chaves estrangeiras das tabelas (pois, não é ativado por padrão)
@@ -24,7 +24,7 @@ def listar_Cadastros():
 ##ROTA INSERT
 #############################################
 
-@TabelaAdminstrador.route("/tabelacliente", methods=["POST"])
+@TabelaCliente.route("/tabelacliente", methods=["POST"])
 def criar_usuario():
     dados = request.get_json(silent=True)
     if not dados:
@@ -54,7 +54,7 @@ def criar_usuario():
 
 ##ROTA UPDATE
 #############################################
-@TabelaAdminstrador.route("/tabelacliente/<int:idCliente>", methods=["PUT", "PATCH"])
+@TabelaCliente.route("/tabelacliente/<int:idCliente>", methods=["PUT", "PATCH"])
 def atualizar_usuario(idCliente):
     dados = request.get_json(silent=True)
     if not dados:
@@ -98,7 +98,7 @@ def atualizar_usuario(idCliente):
 
 ##ROTA DELETE
 #############################################
-@TabelaAdminstrador.route("/tabelacliente/<int:idCliente>", methods=["DELETE"])
+@TabelaCliente.route("/tabelacliente/<int:idCliente>", methods=["DELETE"])
 def deletar_usuario(idCliente):
     conn = conectar()
     cursor = conn.cursor()
